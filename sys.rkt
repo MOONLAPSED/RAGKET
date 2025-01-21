@@ -7,7 +7,7 @@
          json)
 ;; ==========input.json&args==============
 ;; ---------------------------------------
-;; Function to read JSON input file
+;; Function to read JSON input file (hard-arguments)
 (define (read-input-file file-path)
   (with-handlers ([exn:fail? 
                    (lambda (e)
@@ -37,9 +37,7 @@
      (displayln "No input file provided. Using default repository data.")
      (define default-repository
        (list
-        (hash 'id 1 'branch "production" 'permissions '("x") 'state "valid")
-        ;; (hash 'id 2 'branch "staging" 'permissions '("r" "x") 'state "stale")
-        ;; (hash 'id 3 'branch "dev" 'permissions '("r" "w" "x") 'state "valid")))
+        (hash 'id 1 'branch "production" 'permissions '("x") 'state "valid")))
      (validate-repository-state default-repository)]
     [else
      (define input-file (vector-ref args 1))
@@ -48,7 +46,7 @@
                 [repository (hash-ref data 'repository #f)])
            (if repository
                (validate-repository-state repository)
-               (displayln (format "Input file does not contain valid repository data."))))
+               (displayln "Input file does not contain valid repository data.")))
          (displayln (format "Input file '~a' does not exist." input-file)))]))
 
 (module+ main
