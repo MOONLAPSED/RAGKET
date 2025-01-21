@@ -5,6 +5,50 @@
          racket/future
          racket/path
          json)
+;; ==========input.json&args==============
+;; ---------------------------------------
+;; Function to read JSON input file
+(define (read-input-file file-path)
+  (call-with-input-file file-path
+    (lambda (in)
+      (bytes->jsexpr (port->bytes in)))))
+;; Function to validate repository state based on given data
+(define (validate-repository-state repository)
+  (for-each (lambda (instance)
+              (let* ([id (hash-ref instance 'id)]
+                     [branch (hash-ref instance 'branch)]
+                     [permissions (hash-ref instance 'permissions)]
+                     [state (hash-ref instance 'state)])
+                (displayln (format "Instance ID: ~a, Branch: ~a, Permissions: ~a, State: ~a"
+                                   id branch permissions state))
+                ;; Add your validation logic here
+                ))
+            repository))
+;; Main function to process inputs
+(define (main args)
+  (cond
+    [(= (vector-length args) 1) ; No additional arguments provided
+     (displayln "No input file provided. Using default repository data.")
+     (define default-repository
+       (list
+        (hash 'id 1 'branch "production" 'permissions '("x") 'state "valid")
+        (hash 'id 2 'branch "staging" 'permissions '("r" "x") 'state "stale")
+        (hash 'id 3 'branch "dev" 'permissions '("r" "w" "x") 'state "stale")))
+     (validate-repository-state default-repository)]
+    [else
+     (define input-file (vector-ref args 1))
+     (if (file-exists? input-file)
+         (let* ([data (read-input-file input-file)]
+                [repository (hash-ref data 'repository #f)])
+           (if repository
+               (validate-repository-state repository)
+               (displayln "Input file does not contain valid repository data.")))
+         (displayln (format "Input file '~a' does not exist." input-file)))]))
+;; runtime will print 1-9 and fail, if invoked-incorrectly
+(module+ main
+  (apply main (current-command-line-arguments)))
+;; ==========syntax&functions=============
+;; ---------------------------------------
 
 (define f (future (lambda () (displayln "1"))))
 (define result (touch f))
@@ -29,6 +73,8 @@
 (for-each (λ (vals)
             (displayln (touch vals)))
           compute-sums)
+;; ==========python-app-bridge============
+;; ---------------------------------------
 ;; Python process management and communication
 (define python-process #f)
 (define python-input-port #f)
