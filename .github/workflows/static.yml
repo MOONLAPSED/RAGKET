@@ -23,11 +23,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v4.2.2
       - name: Setup Pages
         uses: actions/configure-pages@v5
       - name: Upload artifact
-        uses: actions/upload-pages-artifact@v4
+        uses: actions/upload-pages-artifact@v3.0.1
         with:
           path: '.'
       - name: Deploy to GitHub Pages
@@ -40,7 +40,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v4.2.2
       - name: Set up Python 3.13
         uses: actions/setup-python@v4
         with:
@@ -81,7 +81,7 @@ jobs:
           python main.py 2>&1 | tee -a logs/app.log logs/python-app.log
       - name: Archive test output as artifact
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v4.6.0
         with:
           name: python-app
           path: logs/python-app.log
@@ -90,7 +90,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v4.2.2
       - name: Set up Racket
         run: |
           sudo apt-get update
@@ -114,7 +114,7 @@ jobs:
           racket sys.rkt inputs.json > logs/racket-validation.log 2>&1
       - name: Archive Racket validation output as artifact
         if: always()
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4.6.0
         with:
           name: racket-validation
           path: logs/racket-validation.log
