@@ -5,52 +5,72 @@
          racket/future
          racket/path
          json)
-;; ==========input.json&args==============
+
+;; ========== Logging Utilities ==========
 ;; ---------------------------------------
-;; Function to read JSON input file (hard-arguments)
-(define (read-input-file file-path)
-  (with-handlers ([exn:fail? 
+;; Function to log messages with timestamps
+(define (log-message message)
+  (displayln (format "[~a] ~a" (current-seconds) message)))
+
+;; ========== JSON File Handling ==========
+;; ----------------------------------------
+;; Function to read JSON input file with enhanced error handling
+(define (read-json-file file-path)
+  (with-handlers ([exn:fail?
                    (lambda (e)
-                     (displayln (format "Failed to read input file '~a': ~a" file-path (exn-message e)))
+                     (log-message (format "ERROR: Failed to read file '~a': ~a" file-path (exn-message e)))
                      #f)])
     (call-with-input-file file-path
       (lambda (in)
         (bytes->jsexpr (port->bytes in))))))
 
-;; Function to validate repository state based on given data
-(define (validate-repository-state repository)
-  (for-each (lambda (instance)
-              (let* ([id (hash-ref instance 'id #f)]
-                     [branch (hash-ref instance 'branch #f)]
-                     [permissions (hash-ref instance 'permissions #f)]
-                     [state (hash-ref instance 'state #f)])
-                (if (and id branch permissions state)
-                    (displayln (format "Instance ID: ~a, Branch: ~a, Permissions: ~a, State: ~a"
-                                       id branch permissions state))
-                    (displayln (format "Invalid instance data: ~a" instance)))))
-            repository))
+;; Function to validate input JSON structure
+(define (validate-json data expected-key)
+  (cond
+    [(hash-has-key? data expected-key) (hash-ref data expected-key)]
+    [else
+     (log-message (format "ERROR: JSON does not contain expected key '~a'." expected-key))
+     #f]))
 
-;; Main function to process inputs
+;; ========== Repository Validation ==========
+;; ------------------------------------------
+;; Function to validate repository instance data
+(define (validate-repository-state repository)
+  (for-each
+   (lambda (instance)
+     (let* ([id (hash-ref instance 'id #f)]
+            [branch (hash-ref instance 'branch #f)]
+            [permissions (hash-ref instance 'permissions #f)]
+            [state (hash-ref instance 'state #f)])
+       (if (and id branch permissions state)
+           (log-message (format "INFO: Instance ID: ~a, Branch: ~a, Permissions: ~a, State: ~a"
+                                id branch permissions state))
+           (log-message (format "ERROR: Invalid instance data: ~a" instance)))))
+   repository))
+
+;; ========== Main Functionality ==========
+;; ----------------------------------------
 (define (main args)
+  (log-message (format "INFO: Arguments: ~a" args))
   (cond
     [(= (vector-length args) 1) ; No additional arguments provided
-     (displayln "No input file provided. Using default repository data.")
+     (log-message "INFO: No input file provided. Using default repository data.")
      (define default-repository
        (list
-        (hash 'id 1 'branch "production" 'permissions '("x") 'state "valid")))
+        (hash 'id 1 'branch "production" 'permissions '("x") 'state "stale")))
      (validate-repository-state default-repository)]
     [else
-     (define input-file (vector-ref args 1))
+     (define input-file (vector-ref args 1)) ;; Get the second argument (index 1)
      (if (file-exists? input-file)
-         (let* ([data (read-input-file input-file)]
-                [repository (hash-ref data 'repository #f)])
+         (let* ([data (read-json-file input-file)]
+                [repository (if data (validate-json data 'repository) #f)])
            (if repository
                (validate-repository-state repository)
-               (displayln "Input file does not contain valid repository data.")))
-         (displayln (format "Input file '~a' does not exist." input-file)))]))
+               (log-message "ERROR: Input file does not contain valid repository data.")))
+         (log-message (format "ERROR: Input file '~a' does not exist." input-file)))]))
 
 (module+ main
-  (apply main (current-command-line-arguments)))
+  (apply main (vector->list (current-command-line-arguments))))
 ;; ==========syntax&functions=============
 ;; ---------------------------------------
 
