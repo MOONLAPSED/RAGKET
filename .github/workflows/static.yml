@@ -103,9 +103,7 @@ jobs:
           cat <<EOF > inputs.json
           {
             "repository": [
-              {"id": 1, "branch": "production", "permissions": ["x"], "state": "valid"},
-              {"id": 2, "branch": "staging", "permissions": ["r", "x"], "state": "stale"},
-              {"id": 3, "branch": "dev", "permissions": ["r", "w", "x"], "state": "valid"}
+              {"id": 1, "branch": "production", "permissions": ["x"], "state": "valid"}
             ]
           }
           EOF
