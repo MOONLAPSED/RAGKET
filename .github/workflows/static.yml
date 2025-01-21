@@ -95,6 +95,8 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y racket
+      - name: Make Racket script executable
+        run: chmod +x sys.rkt
       - name: Prepare Racket input data
         run: |
           mkdir -p logs  # Ensure logs directory exists
@@ -109,7 +111,7 @@ jobs:
           EOF
       - name: Run Racket script to validate repository state
         run: |
-          racket src/sys.rkt inputs.json > logs/racket-validation.log 2>&1  # Ensure correct script path
+          racket sys.rkt inputs.json > logs/racket-validation.log 2>&1
       - name: Archive Racket validation output as artifact
         if: always()
         uses: actions/upload-artifact@v2
