@@ -1,5 +1,5 @@
 # RAGKET
-Homoiconic scripting and orchestration language dialect + SDK + in-the-box CI/CD and dev-env featuring Dr. Racket, python, Deno, and GIT. SmallTalk/Pharo-inspired. 'RAG' as-in retreival-augmented generation and 'KET' as in Bra-ket/Dirac+Pauli notation. Agent(s) + Quine and/or User hypervisor.
+Homoiconic scripting and orchestration language dialect + SDK + in-the-box CI/CD and dev-env featuring Dr. Racket, python, Deno, and GIT. SmallTalk/Pharo-inspired. 'RAG' as-in retreival-augmented generation and 'KET' as in Bra-ket/Dirac+Pauli notation. Agent(s) + Quine(s) and/or User(s) hypervisor.
 
 ## Agenda the first: 
 
@@ -8,7 +8,7 @@ Homoiconic scripting and orchestration language dialect + SDK + in-the-box CI/CD
 
 # Quinic Statistical Dynamics,  on Landau Theory,  Landauer's Thoerem,  Maxwell's Demon,  General Relativity and differential geometry:
 
-This document crystalizes the speculative computational architecture designed to model "quantum/'quinic' statistical dynamics" (QSD). By entangling information across temporal runtime abstractions, QSD enables the distributed resolution of probabilistic actions through a network of interrelated quanta—individual runtime instances that interact, cohere, and evolve. This artifact serves as a foundational exposition, guiding future explorations and implementations of this innovative system.
+This document crystalizes the speculative computational architecture designed to model "quantum/'quinic' statistical dynamics" (QSD). By entangling information across temporal runtime abstractions, QSD enables the distributed resolution of probabilistic actions through a network of interrelated quanta—individual runtime instances that interact, cohere, and evolve.
 
 ## Quinic Statistical Dynamics (QSD) centers around three fundamental pillars:
 
@@ -38,8 +38,9 @@ The distributed system functions as a field of interacting runtimes, where stati
 
 ### Lazy/Eventual Consistency of 'Runtime Quanta':
 
-Inter-runtime communication adheres to an active/passive (AP) model internally and an eventual consistency model externally. This allows the system to balance synchronicity with scalability.
-Theoretical Rationale: Runtime as Quanta
+Inter-runtime communication adheres to an availability + partition-tolerance (AP) distributed system internally and an eventual consistency model externally. This allows the system to balance synchronicity with scalability.
+
+### Theoretical Rationale: Runtime as Quanta
 
 The idea of "runtime as quanta" transcends the diminutive associations one might instinctively draw when imagining quantum-scale simulations in software. Unlike subatomic particles, which are bound by strict physical laws and limited degrees of freedom, a runtime in the context of our speculative architecture is hierarchical and associative. This allows us to exploit the 'structure' of informatics and emergent-reality and the ontology of being --- that representing intensive and extensive thermodynamic character: |Φ| --- by hacking-into this ontology using quinic behavior and focusing on the computation as the core object,  not the datastructure,  the data,  or the state/logic,  instead focusing on the holistic state/logic duality of 'collapsed' runtimes creating 'entangled' (quinic) source code; for purposes of multi-instantiation in a distributed systematic probablistic architecture.
 
@@ -53,4 +54,4 @@ Each runtime is a self-contained ecosystem with access to:
 
 This hierarchical richness inherently provides a scaffold for representing intricate realities, from probabilistic field theories to distributed decision-making systems. However, this framework does not merely simulate quantum phenomena but reinterprets them within a meta-reality that operates above and beyond their foundational constraints. It is this capacity for layered abstraction and emergent behavior that makes "runtime as quanta" a viable and transformative concept for the simulation of any conceivable reality.
 
-Quinic Statistical Dynamics challenges conventional notions of runtime behavior, state resolution, and distributed systems. By embracing recursion, entanglement, "Quinic-behavior" and probabilistic action, this architecture aims to quantize classical hardware for agentic 'AGI' on any/all plaforms/scales. 
+Quinic Statistical Dynamics subverts conventional notions of runtime behavior, state resolution, business-logic and distributed systems. By embracing recursion, entanglement, "Quinic-behavior" and probabilistic action, this architecture aims to quantize classical hardware for agentic 'AGI' on any/all plaforms/scales. 
