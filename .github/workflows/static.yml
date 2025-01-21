@@ -113,9 +113,11 @@ jobs:
             echo "inputs.json does not exist!"
             exit 1
           fi
+      - name: Print inputs.json content for debugging
+        run: cat inputs.json
       - name: Run Racket script to validate repository state
         run: |
-          racket sys.rkt inputs.json > logs/racket-validation.log 2>&1
+          racket sys.rkt inputs.json > logs/racket-validation.log 2>&1 || { cat logs/racket-validation.log; exit 1; }
       - name: Archive Racket validation output as artifact
         if: always()
         uses: actions/upload-artifact@v4.6.0
