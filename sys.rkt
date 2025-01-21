@@ -51,26 +51,29 @@
 ;; ========== Main Functionality ==========
 ;; ----------------------------------------
 (define (main args)
-  (log-message (format "INFO: Arguments: ~a" args))
-  (cond
-    [(= (vector-length args) 1) ; No additional arguments provided
-     (log-message "INFO: No input file provided. Using default repository data.")
-     (define default-repository
-       (list
-        (hash 'id 1 'branch "production" 'permissions '("x") 'state "stale")))
-     (validate-repository-state default-repository)]
-    [else
-     (define input-file (vector-ref args 1)) ;; Get the second argument (index 1)
-     (if (file-exists? input-file)
-         (let* ([data (read-json-file input-file)]
-                [repository (if data (validate-json data 'repository) #f)])
-           (if repository
-               (validate-repository-state repository)
-               (log-message "ERROR: Input file does not contain valid repository data.")))
-         (log-message (format "ERROR: Input file '~a' does not exist." input-file)))]))
+  (when (not (vector? args))
+    (error "Expected a vector for arguments, got: ~a" args))
 
-(module+ main
-  (apply main (vector->list (current-command-line-arguments))))
+  (define json-file (vector-ref args 0))
+  (when (not (string? json-file))
+    (error "Expected a string for JSON file, got: ~a" json-file))
+
+  (define json-data
+    (with-handlers ([exn:fail? (lambda (e) (error "Failed to read JSON: ~a" (exn-message e)))])
+      (call-with-input-file json-file read-json)))
+
+  ;; Perform validation on `json-data` as needed
+  (printf "Parsed JSON: ~a\n" json-data)
+
+  ;; Example of validating the `repository` field
+  (define repository (hash-ref json-data 'repository))
+  (unless (list? repository)
+    (error "'repository' must be a list, got: ~a" repository))
+
+  (for ([item repository])
+    (printf "Processing item: ~a\n" item)))
+
+(provide main)
 ;; ==========syntax&functions=============
 ;; ---------------------------------------
 
