@@ -9,21 +9,25 @@
 ;; ---------------------------------------
 ;; Function to read JSON input file
 (define (read-input-file file-path)
-  (call-with-input-file file-path
-    (lambda (in)
-      (bytes->jsexpr (port->bytes in)))))
+  (with-handlers ([exn:fail? 
+                   (lambda (e)
+                     (displayln (format "Failed to read input file '~a': ~a" file-path (exn-message e)))
+                     #f)])
+    (call-with-input-file file-path
+      (lambda (in)
+        (bytes->jsexpr (port->bytes in))))))
 
 ;; Function to validate repository state based on given data
 (define (validate-repository-state repository)
   (for-each (lambda (instance)
-              (let* ([id (hash-ref instance 'id)]
+              (let* ([id (hash-ref instance 'id #f)]
                      [branch (hash-ref instance 'branch #f)]
                      [permissions (hash-ref instance 'permissions #f)]
                      [state (hash-ref instance 'state #f)])
-                (displayln (format "Instance ID: ~a, Branch: ~a, Permissions: ~a, State: ~a"
-                                   id branch permissions state))
-                ;; Add your validation logic here
-                ))
+                (if (and id branch permissions state)
+                    (displayln (format "Instance ID: ~a, Branch: ~a, Permissions: ~a, State: ~a"
+                                       id branch permissions state))
+                    (displayln (format "Invalid instance data: ~a" instance)))))
             repository))
 
 ;; Main function to process inputs
@@ -34,20 +38,17 @@
      (define default-repository
        (list
         (hash 'id 1 'branch "production" 'permissions '("x") 'state "valid")
-        (hash 'id 2 'branch "staging" 'permissions '("r" "x") 'state "-1")
-        (hash 'id 3 'branch "dev" 'permissions '("r" "w" "x") 'state "-1")))
+        ;; (hash 'id 2 'branch "staging" 'permissions '("r" "x") 'state "stale")
+        ;; (hash 'id 3 'branch "dev" 'permissions '("r" "w" "x") 'state "valid")))
      (validate-repository-state default-repository)]
     [else
      (define input-file (vector-ref args 1))
      (if (file-exists? input-file)
-         (with-handlers ([exn:fail?
-                          (lambda (e)
-                            (displayln (format "Failed to read input file '~a': ~a" input-file (exn-message e))))])
-           (let* ([data (read-input-file input-file)]
-                  [repository (hash-ref data 'repository #f)])
-             (if repository
-                 (validate-repository-state repository)
-                 (displayln "Input file does not contain valid repository data."))))
+         (let* ([data (read-input-file input-file)]
+                [repository (hash-ref data 'repository #f)])
+           (if repository
+               (validate-repository-state repository)
+               (displayln (format "Input file does not contain valid repository data."))))
          (displayln (format "Input file '~a' does not exist." input-file)))]))
 
 (module+ main
