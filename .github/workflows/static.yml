@@ -134,10 +134,10 @@ jobs:
 
     - name: Run Racket script to validate repository state
       run: |
-        racket -e "(require 'sys) (sys:main (vector \"inputs.json\"))" > logs/racket-validation.log 2>&1 || { 
-          echo "Racket validation failed. Check logs/racket-validation.log for details." >&2; 
-          cat logs/racket-validation.log; 
-          exit 1; 
+        racket -t sys.rkt -e "(main (vector \"inputs.json\"))" > logs/racket-validation.log 2>&1 || {
+          echo "Racket validation failed. Check logs/racket-validation.log for details." >&2;
+          cat logs/racket-validation.log;
+          exit 1;
         }
 
     - name: Archive Racket validation output as artifact
