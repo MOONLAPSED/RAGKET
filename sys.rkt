@@ -7,7 +7,7 @@
          json)
 ;; ==========input.json&args==============
 ;; ---------------------------------------
-;; Function to read JSON input file (hard-arguments)
+;; Function to read JSON input file with error handling
 (define (read-input-file file-path)
   (with-handlers ([exn:fail? 
                    (lambda (e)
@@ -40,7 +40,7 @@
         (hash 'id 1 'branch "production" 'permissions '("x") 'state "valid")))
      (validate-repository-state default-repository)]
     [else
-     (define input-file (vector-ref args 1))
+     (define input-file (vector-ref args 1)) ;; Get the second argument (index 1)
      (if (file-exists? input-file)
          (let* ([data (read-input-file input-file)]
                 [repository (hash-ref data 'repository #f)])
