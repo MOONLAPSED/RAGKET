@@ -42,7 +42,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4.2.2
       - name: Set up Python 3.13
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5.3.0
         with:
           python-version: "3.13"
       - name: Navigate to directory with main.py and print current directory
@@ -109,6 +109,12 @@ jobs:
             ]
           }
           EOF
+      - name: Verify inputs.json exists
+        run: |
+          if [ ! -f inputs.json ]; then
+            echo "inputs.json does not exist!"
+            exit 1
+          fi
       - name: Run Racket script to validate repository state
         run: |
           racket sys.rkt inputs.json > logs/racket-validation.log 2>&1
