@@ -38,7 +38,7 @@ The distributed system functions as a field of interacting runtimes, where stati
 
 ### Lazy/Eventual Consistency of 'Runtime Quanta':
 
-Inter-runtime communication adheres to an availability + partition-tolerence (AP) distributed system internally and an eventual consistency model externally. This allows the system to balance synchronicity with scalability.
+Inter-runtime communication adheres to an availability + partition-tolerance (AP) distributed system internally and an eventual consistency model externally. This allows the system to balance synchronicity with scalability.
 
 ### Theoretical Rationale: Runtime as Quanta
 
