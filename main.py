@@ -5,6 +5,7 @@ from __future__ import annotations
 # Standard Library Imports - 3.13 std libs **ONLY**
 #------------------------------------------------------------------------------
 import re
+import gc
 import os
 import dis
 import sys
@@ -14,6 +15,7 @@ import site
 import mmap
 import json
 import uuid
+import math
 import cmath
 import shlex
 import socket
@@ -22,6 +24,7 @@ import shutil
 import pickle
 import ctypes
 import pstats
+import weakref
 import logging
 import tomllib
 import pathlib
@@ -41,17 +44,22 @@ import subprocess
 import tracemalloc
 import http.server
 import collections
-from math import sqrt
+import http.client
+import http.server
+import socketserver
 from array import array
 from io import StringIO
 from pathlib import Path
+from math import sqrt, pi
 from datetime import datetime
 from queue import Queue, Empty
-from abc import ABC, abstractmethod
+from abc import ABC, abstractmethod, ABCMeta
 from dataclasses import dataclass, field
+from importlib.machinery import ModuleSpec
 from collections.abc import Iterable, Mapping
 from concurrent.futures import ThreadPoolExecutor
 from enum import Enum, auto, IntEnum, StrEnum, Flag
+from collections import defaultdict, deque, namedtuple
 from functools import reduce, lru_cache, partial, wraps
 from contextlib import contextmanager, asynccontextmanager
 from importlib.util import spec_from_file_location, module_from_spec
@@ -79,6 +87,8 @@ if IS_WINDOWS:
     from pathlib import PureWindowsPath
     def set_process_priority(priority: int):
         windll.kernel32.SetPriorityClass(wintypes.HANDLE(-1), priority)
+    if __name__ == '__main__':
+        set_process_priority(1)
 elif IS_POSIX:
     import resource
     def set_process_priority(priority: int):
@@ -86,6 +96,41 @@ elif IS_POSIX:
             os.nice(priority)
         except PermissionError:
             print("Warning: Unable to set process priority. Running with default priority.")
+    if __name__ == '__main__':
+        set_process_priority(1)
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+def is_port_available(port: int) -> bool:
+    """Check if a given port is available."""
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
+        result = sock.connect_ex(('127.0.0.1', port))
+        return result != 0  # If the result is not 0, the port is available
+
+def find_available_port(start_port: int) -> int:
+    """Find an available port starting from start_port."""
+    port = start_port
+    while not is_port_available(port):
+        logger.info(f"Port {port} is occupied. Trying next port.")
+        port += 1
+    logger.info(f"Found available port: {port}")
+    return port
+
+@lambda _: _()
+def FireFirst() -> None:
+    """Function that fires on import."""
+    #profiler.enable()
+    #logger.info("Profiler enabled.")
+    PORT = 8420
+    try:
+        available_port = find_available_port(PORT)
+        logger.info(f"Using port: {available_port}")
+        print(f'func you')
+    except Exception as e:
+        logger.error(f"An error occurred: {e}")
+    finally:
+        return True  # Fires as soon as Python sees it
 
 class SystemProfiler:
     """Handles system profiling and performance measurements"""
