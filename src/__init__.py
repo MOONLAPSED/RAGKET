@@ -120,8 +120,8 @@ def find_available_port(start_port: int) -> int:
 @lambda _: _()
 def FireFirst() -> None:
     """Function that fires on import."""
-    profiler.enable()
-    logger.info("Profiler enabled.")
+    # profiler.enable()
+    # logger.info("Profiler enabled.")
     PORT = 8420
     try:
         available_port = find_available_port(PORT)
