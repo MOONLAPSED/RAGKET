@@ -5,6 +5,30 @@ Homoiconic scripting and orchestration language dialect + SDK + in-the-box CI/CD
 
 >Port https://github.com/MOONLAPSED/demiurge/issues/14 -> Pythonic-meta-runtime -> Racket+GIT[hooks]::associative/agentic-meta-runtime[python++].
 
+1/23/25: functionally complete, we-achieved an even-higher goal. The runtime morphology's nothing compared to the file system and git dimension which /src/mods/rings.py has pushed-forward coherently, so this repo is now frozen as proof of quantum state/logic duality, quinic phenomenology, natural auto-epistemic propagation in morpho-space and entangled-git architecture (this last thing being the claim that this repo positions with any veracity, see below for extrapolation and wider/broader interpretations (repos)).
+
+https://github.com/MOONLAPSED/RAGKET/commit/c3b5a33b3bc9361d8517c60a7733db9658da75a0:
+
+    https://github.com/MOONLAPSED/RAGKET/commit/38901f6e37ed7372e42066c4a419269cc7e92c43
+    https://github.com/MOONLAPSED/RAGKET/commit/67289400256310fba35f9313d70c9ae3b63fb6bc
+    https://github.com/MOONLAPSED/RAGKET/commit/76b217b67ee348b6bcd0842474e95ac121947d17
+    https://github.com/MOONLAPSED/RAGKET/commit/1a6d73712da80d50ebbd4fb11909ddb203b23f1e
+____
+
+## 1/23/25 repo development-halted
+
+Repository is frozen as its proof of concept has been achieved and archived. 
+
+If you want more of my antics, either search 'Cognosis' to find the production repository on my alt-account, or go here for the dev-branch: 
+
+    https://github.com/MOONLAPSED/cognosis
+
+Or here, or here for even-more, including a public KB or starting-context if you want to try without using your own data:
+
+    https://github.com/MOONLAPSED/demiurge
+    https://github.com/MOONLAPSED/abraxus
+
+_____
 
 # Quinic Statistical Dynamics,  on Landau Theory,  Landauer's Thoerem,  Maxwell's Demon,  General Relativity and differential geometry:
 
