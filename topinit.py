@@ -373,6 +373,6 @@ def main() -> int:
 
 if __name__ == "__main__":
   # Try:
-  # python main.py -- python -c "print('hello')"
-  # python main.py -- python src/app.py arg1  
+  # python topinit.py -- python -c "print('hello')"
+  # python topinit.py -- python src/__init__.py arg1  
   sys.exit(main())
