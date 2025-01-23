@@ -7,7 +7,7 @@ Homoiconic scripting and orchestration language dialect + SDK + in-the-box CI/CD
 
 1/23/25: functionally complete, we-achieved an even-higher goal. The runtime morphology's nothing compared to the file system and git dimension which /src/mods/rings.py has pushed-forward coherently, so this repo is now frozen as proof of quantum state/logic duality, quinic phenomenology, natural auto-epistemic propagation in morpho-space and entangled-git architecture (this last thing being the claim that this repo positions with any veracity, see below for extrapolation and wider/broader interpretations (repos)).
 
-https://github.com/MOONLAPSED/RAGKET/commit/c3b5a33b3bc9361d8517c60a7733db9658da75a0:
+[https://github.com/MOONLAPSED/RAGKET/commit/c3b5a33b3bc9361d8517c60a7733db9658da75a0:](https://github.com/MOONLAPSED/RAGKET/commit/4edf84349556f88d9b86aac814ba87e155ff1a67#diff-1f349201489bb0aabc4b0d9a768aea91eb2bd5585d004f4ef5110531835a41cd)
 
     https://github.com/MOONLAPSED/RAGKET/commit/38901f6e37ed7372e42066c4a419269cc7e92c43
     https://github.com/MOONLAPSED/RAGKET/commit/67289400256310fba35f9313d70c9ae3b63fb6bc
