@@ -5,16 +5,38 @@
          racket/future
          racket/path
          json)
-
-;; ========== Logging Utilities ==========
+;; ===========Syntax-&-Macros===============
+;; ----'RPN',-Functional-notation---------
+(define f (future (lambda () (displayln "Integers:"))))
+(define result (touch f))
+;; macros are a function that takes syntax obj -> syntax obj
+(provide mapprox)
+(require (for-syntax syntax/parse))
+;; a macro which prints <char>(s) to terminal
+(define-syntax mapprox
+  (syntax-parser ; syntax obj are S-expressions+data
+    [(_ ([el:id l:expr])
+        body:expr ...)
+     #'(map (lambda (el) body ...)
+            l)]))
+;; ===========Logging-Utilities===========
 ;; ---------------------------------------
+(mapprox ([x `(0 1 2 3 4 5 6 7 8 9)])
+  (+ x 1)) ; binds 'x' to each element in-turn using mapprox
+;; map + proxy S-expression list comprehension
+(define compute-sums
+  (mapprox ([i (range 0 9)])
+    (future (λ () (+ i 1)))))
+;; Retrieve and print the results
+(for-each (λ (vals)
+            (displayln (touch vals)))
+          compute-sums)
+;; ===========Logging-Utilities===========
 ;; Function to log messages with timestamps
 (define (log-message message)
   (displayln (format "[~a] ~a" (current-seconds) message)))
-
-;; ========== JSON File Handling ==========
-;; ----------------------------------------
-;; Function to read JSON input file with enhanced error handling
+;; ========== JSON-File-Handling===========
+;; --------Read-JSON-input-file------------
 (define (read-json-file file-path)
   (with-handlers ([exn:fail?
                    (lambda (e)
@@ -23,18 +45,16 @@
     (call-with-input-file file-path
       (lambda (in)
         (bytes->jsexpr (port->bytes in))))))
-
-;; Function to validate input JSON structure
+;; =====Validate-input-JSON-structure======
+;; --------Read-JSON-input-file------------
 (define (validate-json data expected-key)
   (cond
     [(hash-has-key? data expected-key) (hash-ref data expected-key)]
     [else
      (log-message (format "ERROR: JSON does not contain expected key '~a'." expected-key))
      #f]))
-
 ;; ========== Repository Validation ==========
-;; ------------------------------------------
-;; Function to validate repository instance data
+;; ----Validate-repository-instance-data------
 (define (validate-repository-state repository)
   (for-each
    (lambda (instance)
@@ -47,7 +67,6 @@
                                 id branch permissions state))
            (log-message (format "ERROR: Invalid instance data: ~a" instance)))))
    repository))
-
 ;; ========== Main Functionality ==========
 ;; ----------------------------------------
 (define (main args)
@@ -61,10 +80,8 @@
   (define json-data
     (with-handlers ([exn:fail? (lambda (e) (error "Failed to read JSON: ~a" (exn-message e)))])
       (call-with-input-file json-file read-json)))
-
   ;; Perform validation on `json-data` as needed
   (printf "Parsed JSON: ~a\n" json-data)
-
   ;; Example of validating the `repository` field
   (define repository (hash-ref json-data 'repository))
   (unless (list? repository)
@@ -74,35 +91,8 @@
     (printf "Processing item: ~a\n" item)))
 
 (provide main)
-;; ==========syntax&functions=============
-;; ---------------------------------------
-
-(define f (future (lambda () (displayln "1"))))
-(define result (touch f))
-
-(provide mapprox)
-(require (for-syntax syntax/parse))
-;; macros are a function that takes syntax obj -> syntax obj
-(define-syntax mapprox ; a macro which prints <char>(s) to terminal
-  (syntax-parser ; syntax obj are S-expressions+data
-    [(_ ([el:id l:expr])
-        body:expr ...)
-     #'(map (lambda (el) body ...)
-            l)]))
-;; map + proxy S-expression list comprehension
-(mapprox ([x `(1 2 3 4)])
-  (+ x 1)) ; binds 'x' to each element in-turn using mapprox
-
-(define compute-sums
-  (mapprox ([i (range 5 9)])
-    (future (λ () (+ i 1)))))
-;; Retrieve and print the results
-(for-each (λ (vals)
-            (displayln (touch vals)))
-          compute-sums)
 ;; ==========python-app-bridge============
-;; ---------------------------------------
-;; Python process management and communication
+;; ---Python-process-management-and-IPC---
 (define python-process #f)
 (define python-input-port #f)
 (define python-output-port #f)

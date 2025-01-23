@@ -24,27 +24,23 @@ class RuntimeMetadata:
     canonical_time: float
     instance_id: str
     git_commit: str
-    git_branch: str
-    filesystem_state: Dict[str, Any]
+    fs_state: Dict[str, Any]
 
 class QuinicRuntime:
-    """A self-aware runtime that can observe and modify its own state"""
-    
     def __init__(self, base_path: Path):
         self.base_path = base_path
         self.state = QuantumState.SUPERPOSITION
         self.metadata = self._initialize_metadata()
         self.statistics = StatisticalDynamics(self)
         self.consensus = LazyConsensus(self)
-        
+
     def _initialize_metadata(self) -> RuntimeMetadata:
-        """Create initial runtime metadata including git and filesystem state"""
+        """Initialize runtime with self-awareness metadata"""
         return RuntimeMetadata(
-            canonical_time=time.time_ns() / 1e9,  # High precision timestamp
+            canonical_time=time.time_ns(),  # Nanosecond precision
             instance_id=str(uuid.uuid4()),
             git_commit=self._get_git_commit(),
-            git_branch=self._get_git_branch(),
-            filesystem_state=self._get_fs_state()
+            fs_state=self._snapshot_fs_state()
         )
     
     async def create_quantum_branch(self, name: str) -> None:
@@ -100,30 +96,17 @@ class QuinicRuntime:
         """Get current git commit hash"""
         try:
             result = subprocess.run(
-                ["git", "rev-parse", "HEAD"],
+                ['git', 'rev-parse', 'HEAD'],
                 cwd=self.base_path,
                 capture_output=True,
                 text=True
             )
             return result.stdout.strip()
-        except subprocess.SubprocessError:
-            return "unknown"
-            
-    def _get_git_branch(self) -> str:
-        """Get current git branch name"""
-        try:
-            result = subprocess.run(
-                ["git", "rev-parse", "--abbrev-ref", "HEAD"],
-                cwd=self.base_path,
-                capture_output=True,
-                text=True
-            )
-            return result.stdout.strip()
-        except subprocess.SubprocessError:
-            return "unknown"
+        except subprocess.CalledProcessError:
+            raise RuntimeError("Not in a valid git repository")
 
     def _snapshot_fs_state(self) -> Dict[str, Any]:
-        """Capture filesystem state for this runtime instance"""
+        """Create filesystem state snapshot"""
         state = {}
         try:
             result = subprocess.run(
@@ -137,71 +120,28 @@ class QuinicRuntime:
                 state[path] = {'mode': mode, 'hash': hash_}
         except subprocess.CalledProcessError:
             raise RuntimeError("Failed to snapshot filesystem state")
-
-        try:        
-            for root, dirs, files in os.walk(self.base_path):
-                rel_path = Path(root).relative_to(self.base_path)
-                state[str(rel_path)] = {
-                    'dirs': dirs,
-                    'files': files,
-                    'permissions': os.stat(root).st_mode
-                }
-            return state
-        except:
-            raise RuntimeError("Failed to snapshot filesystem state")
-
-    def _get_fs_state(self) -> Dict[str, Any]:
-        """Capture filesystem state for this runtime instance"""
-        state = {}
-        for root, dirs, files in os.walk(self.base_path):
-            rel_path = Path(root).relative_to(self.base_path)
-            state[str(rel_path)] = {
-                'dirs': dirs,
-                'files': files,
-                'permissions': os.stat(root).st_mode
-            }
         return state
 
     def validate_instance(self) -> bool:
         """Validate runtime instance integrity"""
         try:
             # Check filesystem permissions
-            if not os.access(self.base_path, os.R_OK | os.W_OK | os.X_OK):
-                print("Filesystem permissions are invalid.")
-                return False
+            assert os.access(self.base_path, os.R_OK | os.W_OK | os.X_OK)
             
             # Validate git state
             current_commit = self._get_git_commit()
-            if current_commit != self.metadata.git_commit:
-                print(f"Git commit mismatch: {current_commit} != {self.metadata.git_commit}")
-                return False
+            assert current_commit == self.metadata.git_commit
             
-            # Validate git repository state
-            if subprocess.run(
-                ["git", "rev-parse", "--git-dir"],
-                cwd=self.base_path,
-                capture_output=True
-            ).returncode != 0:
-                print("Invalid git repository state.")
-                return False
-
             # Validate filesystem state
             current_fs_state = self._snapshot_fs_state()
-            expected_fs_state = self.metadata.filesystem_state
-            if current_fs_state != expected_fs_state:
-                print("Filesystem state mismatch.")
-                print(f"Current FS State: {current_fs_state}")
-                print(f"Expected FS State: {expected_fs_state}")
-                return False
+            assert current_fs_state == self.metadata.fs_state
             
             return True
-        except Exception as e:
-            print(f"Validation error: {e}")
+        except Exception:
             self.state = QuantumState.DECOHERENT
             return False
 
-    def quine(self) -> Optional['QuinicRuntime']:
-        """Create a new runtime instance with genetic inheritance"""
+    def quine(self) -> 'QuinicRuntime':
         """Create a new runtime instance maintaining quantum entanglement"""
         if self.state == QuantumState.DECOHERENT:
             raise RuntimeError("Cannot quine from decoherent state")
@@ -214,25 +154,12 @@ class QuinicRuntime:
             ['git', 'notes', 'append', '-m', f'entangled:{self.metadata.instance_id}'],
             cwd=self.base_path
         )
-        if not self.validate_instantiation():
-            return None
-            
-        # Create new branch for this instance
-        new_branch = f"quinic/{self.metadata.instance_id}"
-        subprocess.run(
-            ["git", "checkout", "-b", new_branch],
-            cwd=self.base_path
-        )
         
-        # Initialize new runtime with inherited state
-        new_runtime = QuinicRuntime(self.base_path)
-        new_runtime.state = QuantumState.ENTANGLED
-        
-        return new_runtime
+        return new_instance
 
     async def run_quantum_computation(self, computation):
         """Execute computation maintaining quantum state awareness"""
-        async with self.quantum_context():
+        with self.quantum_context():
             if not self.validate_instance():
                 raise RuntimeError("Invalid runtime state")
                 
@@ -249,48 +176,6 @@ class QuinicRuntime:
             except Exception as e:
                 self.state = QuantumState.DECOHERENT
                 raise RuntimeError(f"Computation failed: {e}")
-
-    def commit_state(self, message: str) -> bool:
-        """Commit current state to git"""
-        try:
-            # Stage all changes
-            subprocess.run(
-                ["git", "add", "."],
-                cwd=self.base_path,
-                check=True
-            )
-            
-            # Create commit with metadata
-            commit_msg = f"""
-            Quinic State Transition
-            
-            Instance: {self.metadata.instance_id}
-            Time: {self.metadata.canonical_time}
-            State: {self.state.value}
-            
-            {message}
-            """
-            
-            subprocess.run(
-                ["git", "commit", "-m", commit_msg],
-                cwd=self.base_path,
-                check=True
-            )
-            
-            # Update metadata
-            self.metadata.git_commit = self._get_git_commit()
-            return True
-            
-        except subprocess.SubprocessError:
-            return False
-
-    def __enter__(self):
-        """Enable context manager pattern for state management"""
-        return self.quantum_context().__enter__()
-        
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        """Cleanup when exiting context"""
-        return self.quantum_context().__exit__(exc_type, exc_val, exc_tb)
 
 def create_quinic_runtime(path: Optional[Path] = None) -> QuinicRuntime:
     """Factory function to create a new quinic runtime instance"""
@@ -460,35 +345,141 @@ class QuantumFrame:
         magnitude_vec = math.sqrt(sum(y * y for y in vec))
         return dot_product / (magnitude_self * magnitude_vec) if magnitude_self and magnitude_vec else 0.0
 
-# ===============================================================================
 
-def main():
-    # Synchronous entry point
-    runtime = create_quinic_runtime(Path.cwd())
-    print(f"Runtime created with ID: {runtime.metadata.instance_id}")
+class AssociativeRuntime:
+    """
+    The runtime system that orchestrates quantum cognitive frames, their entanglement, and pattern recognition.
+    """
+    def __init__(self):
+        self.frames: Dict[str, QuantumFrame] = {}
+        self.recursive_patterns: Dict[str, List[str]] = defaultdict(list)
+        
+    async def atomize(self, text: str) -> List[QuantumFrame]:
+        """
+        Breaks down the input text into atomic cognitive frames and computes their entanglement.
+        """
+        units = self._decompose(text)
+        frames = await self._superpose(units)
+        self._detect_recursion(frames)
+        return frames
     
-    # Example of validating the instance
-    if runtime.validate_instance():
-        print("Runtime instance is valid.")
-    else:
-        print("Runtime instance is invalid.")
+    def _decompose(self, text: str) -> List[str]:
+        """
+        Decomposes the text into units based on recognisable patterns.
+        """
+        units = []
+        buffer = ""
+        for char in text:
+            buffer += char
+            if self._is_pattern_complete(buffer):
+                units.append(buffer)
+                buffer = ""
+        if buffer:
+            units.append(buffer)
+        return units
+
+    async def _superpose(self, units: List[str]) -> List[QuantumFrame]:
+        """
+        Creates quantum frames from decomposed units, encoding them into latent vectors.
+        """
+        frames = []
+        for unit in units:
+            frame = QuantumFrame(surface_form=unit, latent_vector=self._generate_latent_vector(unit))
+            await self._check_entanglement(frame)
+            frames.append(frame)
+        return frames
+
+    def _generate_latent_vector(self, text: str) -> List[float]:
+        """
+        Generates a latent vector for a given text unit using a quantum-inspired transformation.
+        """
+        vector = [random.gauss(0, 1) for _ in range(64)]
+        phase = len(text) / 10
+        return self._apply_quantum_rotation(vector, phase)
+
+    def _apply_quantum_rotation(self, vector: List[float], phase: float) -> List[float]:
+        """
+        Applies a quantum rotation to the latent vector based on a given phase.
+        """
+        rotation_matrix = [
+            [math.cos(phase), -math.sin(phase)],
+            [math.sin(phase), math.cos(phase)]
+        ]
+        transformed = []
+        for i in range(0, len(vector), 2):
+            x = vector[i]
+            y = vector[i + 1] if i + 1 < len(vector) else 0
+            new_x = x * rotation_matrix[0][0] + y * rotation_matrix[0][1]
+            new_y = x * rotation_matrix[1][0] + y * rotation_matrix[1][1]
+            transformed.extend([new_x, new_y])
+        return transformed
+
+    def _is_pattern_complete(self, text: str) -> bool:
+        """
+        Checks whether a pattern has been fully matched in the input text.
+        """
+        for pattern in self.recursive_patterns:
+            if self._matches_pattern(text, pattern):
+                return True
+        return False
+
+    def _matches_pattern(self, text: str, pattern: str) -> bool:
+        """
+        Checks if a text matches a given recursive pattern.
+        """
+        return pattern in text
+
+    def _update_patterns(self, text: str) -> None:
+        """
+        Updates recursive patterns based on new text encounters.
+        """
+        for i in range(1, len(text)):
+            substring = text[:i]
+            if text.count(substring) > 1:
+                self.recursive_patterns[substring].append(text)
+
+    async def _check_entanglement(self, frame: QuantumFrame) -> None:
+        """
+        Checks for entanglement opportunities between frames based on latent similarity or recursion patterns.
+        """
+        for existing_frame in self.frames.values():
+            frame.entangle(existing_frame)
+
+    def _detect_recursion(self, frames: List[QuantumFrame]) -> None:
+        """
+        Detects recursive structures within frames.
+        """
+        for frame in frames:
+            self._analyze_recursion(frame)
+
+    def _analyze_recursion(self, frame: QuantumFrame) -> None:
+        """
+        Analyzes potential recursive patterns within a single frame.
+        """
+        sequence = frame.surface_form
+        for size in range(1, len(sequence)//2 + 1):
+            pattern = sequence[:size]
+            if self._is_recursive_pattern(pattern, sequence):
+                self.recursive_patterns[frame.surface_form].append(pattern)
+
+    def _is_recursive_pattern(self, pattern: str, sequence: str) -> bool:
+        """
+        Checks whether a given pattern is recursively repeated in the sequence.
+        """
+        return sequence.count(pattern) > 1
+
 
 async def asyncmain():
-    # Asynchronous entry point
-    runtime = await create_statistical_runtime(Path.cwd())
-    print(f"Async Runtime created with ID: {runtime.metadata.instance_id}")
+    # Create an instance of QuinicRuntime
+    runtime = create_quinic_runtime()
     
-    # Example of running a quantum computation
-    async def sample_computation(runtime):
-        # Placeholder for a computation
-        return "Sample computation result"
-
-    try:
-        result = await runtime.run_quantum_computation(sample_computation)
-        print(f"Computation result: {result}")
-    except RuntimeError as e:
-        print(f"Error during computation: {e}")
+    # Sample text for atomization
+    text = "((lambda (x) (+ x x)) (lambda (y) (* y y)))"
+   
+    # Perform quantum computation across branches
+    async with runtime.quantum_computation():
+        # Additional quantum computation logic can be added here
+        pass
 
 if __name__ == "__main__":
-    main()
     asyncio.run(asyncmain())
